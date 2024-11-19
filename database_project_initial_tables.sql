@@ -3,6 +3,15 @@ CREATE TABLE COMPANY (
   c_name TEXT NOT NULL
 );
   
+CREATE TABLE ADDRESS (
+  address_id INTEGER PRIMARY KEY,
+  zip         INTEGER NOT NULL,
+  city        TEXT    NOT NULL,
+  state       CHAR(2) NOT NULL,
+  line1       TEXT    NOT NULL,
+  line2       TEXT
+);
+  
 CREATE TABLE COMPANY_AFFILIATE (
   personal_id INTEGER PRIMARY KEY,
   fname       TEXT    NOT NULL,
@@ -10,11 +19,8 @@ CREATE TABLE COMPANY_AFFILIATE (
   age         INTEGER NOT NULL,
   gender      CHAR(1)
     CHECK (gender IN ('M', 'F', 'O')),
-  zip         INTEGER NOT NULL,
-  city        TEXT    NOT NULL,
-  state       CHAR(2) NOT NULL,
-  line1       TEXT    NOT NULL,
-  line2       TEXT
+  address_id INTEGER NOT NULL,
+  FOREIGN KEY (address_id) REFERENCES ADDRESS(address_id)
 );
 
 CREATE TABLE DEPARTMENT (
@@ -81,12 +87,16 @@ CREATE TABLE JOB_POS (
 
 CREATE TABLE APPLICATION (
   app_id          INTEGER PRIMARY KEY,
-  personal_id     INTEGER NOT NULL,
+  personal_id_emp     INTEGER NOT NULL DEFAULT 0,
+  personal_id_potential INTEGER NOT NULL DEFAULT 0,
   job_id          INTEGER NOT NULL,
   
   FOREIGN KEY (job_id) REFERENCES JOB_POS(job_id),
-  FOREIGN KEY (personal_id) REFERENCES EMPLOYEE(personal_id),           -- FIX HERE
-  FOREIGN KEY (personal_id) REFERENCES POTENTIAL_EMPLOYEE(personal_id)  -- FIX HERE
+  # created two separate attributes to provide distinction between the two entities.
+  # one of them will always be 0, meaning that the employee is the other personal_id
+  # not sure if this is a permanent solution, what do you think?
+  FOREIGN KEY (personal_id_emp) REFERENCES EMPLOYEE(personal_id),           -- FIX HERE
+  FOREIGN KEY (personal_id_potential) REFERENCES POTENTIAL_EMPLOYEE(personal_id)  -- FIX HERE
 );
 
 CREATE TABLE INTERVIEW (      -- personal_id, round_num, and app_id should be primary key
@@ -97,11 +107,9 @@ CREATE TABLE INTERVIEW (      -- personal_id, round_num, and app_id should be pr
   app_id        INTEGER   NOT NULL,
   round_num     INTEGER   NOT NULL,
   CHECK (round_num > 0),
-  job_id        INTEGER   NOT NULL,
-  
-  FOREIGN KEY (personal_id) REFERENCES APPLICATION(personal_id),
+  # removed this since we have the personal_id in the APPLICATION relation.
+  # FOREIGN KEY (personal_id) REFERENCES APPLICATION(personal_id),
   FOREIGN KEY (app_id)      REFERENCES APPLICATION(app_id),
-  FOREIGN KEY (job_id)      REFERENCES JOB_POS(job_id),
   PRIMARY KEY (personal_id, round_num, app_id)
 );
 
