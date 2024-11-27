@@ -903,7 +903,7 @@ WHERE
 -- Query 6
 SELECT
     e.personal_id,
-    ca.fname || ' ' || ca.lname AS salesperson_name
+    CONCAT (ca.fname, " ", ca.lname) AS salesperson_name
 FROM
     EMPLOYEE e
     JOIN COMPANY_AFFILIATE ca ON e.personal_id = ca.personal_id
