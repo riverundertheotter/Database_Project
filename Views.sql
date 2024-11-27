@@ -69,24 +69,26 @@ FROM
 CREATE VIEW
     View3 AS
 SELECT
-    p.product_type,
-    COUNT(s.sale_id) AS items_sold
+    p.product_type, -- getting product type
+    COUNT(s.sale_id) AS items_sold -- getting total amount of sales for each product
 FROM
     SALE s
-    JOIN PRODUCT p ON s.prod_id = p.prod_id
+    JOIN PRODUCT p ON s.prod_id = p.prod_id -- join where the product ids match
 GROUP BY
+    -- group results by product type
     p.product_type;
 
 -- View4
 CREATE VIEW
     View4 AS
 SELECT
-    rp.prod_id,
-    SUM(pr.price) AS total_part_cost
+    rp.prod_id, -- getting product id of required product
+    SUM(p.price) AS total_part_cost -- summing the total price of all required parts on a product
 FROM
     REQUIRED_PARTS rp
-    JOIN PART pr on rp.part_id = pr.part_id
+    JOIN PART p on rp.part_id = p.part_id -- join required parts on product where the part_id matches.
 GROUP BY
+    -- group by product_id
     rp.prod_id;
 
 -- verifying the views are correct
