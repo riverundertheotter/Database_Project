@@ -1,36 +1,39 @@
 -- Query 1
 SELECT
-    i.interviewer_id,
-    CONCAT (c.fname, ' ', c.lname) AS interviewer_name
+    i.interviewer_id, -- selecting interviewer id
+    CONCAT (c.fname, ' ', c.lname) AS interviewer_name -- select and concat the two values to make the full name of the interviewer
 FROM
     INTERVIEWERS i
-    JOIN EMPLOYEE em ON i.interviewer_id = em.personal_id
-    JOIN COMPANY_AFFILIATE c ON em.personal_id = c.personal_id
-    JOIN APPLICATION a ON i.app_id = a.app_id
-    JOIN COMPANY_AFFILIATE interviewee ON a.personal_id = interviewee.personal_id
+    JOIN EMPLOYEE em ON i.interviewer_id = em.personal_id -- finding interviewers who are employees
+    JOIN COMPANY_AFFILIATE c ON em.personal_id = c.personal_id -- connecting with company_affiliate to get the names of the interviewers
+    JOIN APPLICATION a ON i.app_id = a.app_id -- for those interviewers on this specific application's interview
+    JOIN COMPANY_AFFILIATE interviewee ON a.personal_id = interviewee.personal_id -- find the interviewee's personal information
 WHERE
+    -- if the name is Hellen Cole, and the job_id is 11111, find the interviewer's personal_ids
     interviewee.fname = "Hellen"
     AND interviewee.lname = "Cole"
     AND a.job_id = 11111;
 
 -- Query 2
 SELECT
-    j.job_id
+    j.job_id -- select the job_id
 FROM
-    JOB_POS j
-    JOIN DEPARTMENT d ON j.job_id
+    JOB_POS j -- as a job position
+    JOIN DEPARTMENT d ON j.job_id -- and join the department with the job on the basis of the job_id
 WHERE
-    d.dep_name = 'Marketing'
+    d.dep_name = 'Marketing' -- where the posting department is Marketing
+    -- and the job was posted in january 2011
     AND j.post_date BETWEEN '2011-01-01' AND '2011-01-31';
 
 -- Query 3
 SELECT
-    e.personal_id,
-    CONCAT (ca.fname, ' ', ca.lname)
+    e.personal_id, -- select the personal_id of an employee
+    CONCAT (ca.fname, ' ', ca.lname) -- and their name
 FROM
     EMPLOYEE e
-    JOIN COMPANY_AFFILIATE ca ON e.personal_id = ca.personal_id
+    JOIN COMPANY_AFFILIATE ca ON e.personal_id = ca.personal_id -- linking the employee to the company_affiliate (same individual)
 WHERE
+    -- where the employee is not a manager (has nobody as subordinates under them)
     e.personal_id NOT IN (
         SELECT
             sup_id
@@ -40,10 +43,11 @@ WHERE
 
 -- Query 4
 SELECT
-    s.site_id,
-    s.site_location
+    s.site_id, -- select the site's id
+    s.site_location -- and its location
 FROM
-    SITE S
+    SITE S -- from site
+    -- find this site's marketing department
     JOIN DEPARTMENT d ON d.dep_id = (
         SELECT
             dep_id
@@ -52,57 +56,66 @@ FROM
         WHERE
             dep_name = 'Marketing'
     )
+    -- find all sales records from all sites
     LEFT JOIN SALE sa ON sa.site_id = s.site_id
+    -- during march 2011
     AND sa.sale_time BETWEEN '2011-03-01' AND '2011-03-31'
 WHERE
+    -- where there were no sales made
     sa.sale_id IS NULL;
 
 -- Query 5
 SELECT
-    j.job_id,
-    j.job_desc
+    j.job_id, -- select the job_id
+    j.job_desc -- and description
 FROM
     JOB_POS j
-    LEFT JOIN APPLICATION a ON j.job_id = a.job_id
+    LEFT JOIN APPLICATION a ON j.job_id = a.job_id -- find all job_ids from applications
 WHERE
+    -- where there were no applications for the past month
     a.app_id IS NULL
-    AND j.post_date < DATE_SUB(NOW(), INTERVAL 1 MONTH);
+    AND j.post_date < DATE_SUB (NOW (), INTERVAL 1 MONTH);
 
 -- Query 6
 SELECT
-    e.personal_id,
-    CONCAT (ca.fname, " ", ca.lname) AS salesperson_name
+    e.personal_id, -- select a salesperson's id
+    CONCAT (ca.fname, ' ', ca.lname) AS salesperson_name -- and their name
 FROM
     EMPLOYEE e
-    JOIN COMPANY_AFFILIATE ca ON e.personal_id = ca.personal_id
+    JOIN COMPANY_AFFILIATE ca ON e.personal_id = ca.personal_id -- match employee to company_affiliate to get personal info
 WHERE
+    -- there are no cases of
     NOT EXISTS (
-        SELECT DISTINCT
-            p.product_type
+        SELECT
+            p.product_type -- select a product
         FROM
             PRODUCT p
         WHERE
-            p.list_price > 200
-            AND NOT EXISTS (
+            p.list_price > 200 -- which costs more than $200
+            AND NOT EXISTS ( -- checking the negation of this following subquery
                 SELECT
-                    1
+                    1 -- return a match if found (exists)
                 FROM
                     SALE s
                 WHERE
+                    -- where a salesperson has sold the product
                     s.salesperson_id = e.personal_id
                     AND s.prod_id = p.prod_id
             )
+            -- so, find cases of when a salesperson has not sold a product listed above $200
+            -- and then negate that to find only those salespeople who have sold (at least one of) every product worth more than $200
     );
 
 -- Query 7
 SELECT
-    d.dep_id,
-    d.dep_name
+    d.dep_id, -- select a department's id
+    d.dep_name -- and its name
 FROM
     DEPARTMENT d
-    LEFT JOIN JOB_POS j ON d.dep_id = j.d_id
-    AND j.post_date BETWEEN '2011-01-01' AND '2011-02-01'
+    LEFT JOIN JOB_POS j ON d.dep_id = j.d_id -- find all job positions that are posted by the department
+    AND j.post_date BETWEEN '2011-01-01' AND '2011-02-01' -- and only those postings between January 1 and February 1, 2011
 WHERE
+    -- where there are no postings (so find all departments who have not posted a job in this timeframe)
     j.job_id IS NULL;
 
 -- #8
