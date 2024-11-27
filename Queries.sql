@@ -66,7 +66,7 @@ FROM
     LEFT JOIN APPLICATION a ON j.job_id = a.job_id
 WHERE
     a.app_id IS NULL
-    AND j.post_date < DATE_SUB (NOW (), INTERVAL 1 MONTH);
+    AND j.post_date < DATE_SUB(NOW(), INTERVAL 1 MONTH);
 
 -- Query 6
 SELECT
