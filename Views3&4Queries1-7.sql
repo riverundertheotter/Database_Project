@@ -834,15 +834,16 @@ GROUP BY
 -- Query 1
 SELECT
     i.interviewer_id,
-    CONCAT (e.fname, ' ', e.lname) AS interviewer_name
+    CONCAT (c.fname, ' ', c.lname) AS interviewer_name
 FROM
     INTERVIEWERS i
     JOIN EMPLOYEE em ON i.interviewer_id = em.personal_id
+    JOIN COMPANY_AFFILIATE c ON em.personal_id = c.personal_id
     JOIN APPLICATION a ON i.app_id = a.app_id
-    JOIN COMPANY_AFFILIATE ca ON a.personal_id = ca.personal_id_emp
+    JOIN COMPANY_AFFILIATE interviewee ON a.personal_id = interviewee.personal_id
 WHERE
-    ca.fname = "Helen"
-    AND ca.lname = "Cole"
+    interviewee.fname = "Hellen"
+    AND interviewee.lname = "Cole"
     AND a.job_id = 11111;
 
 -- Query 2
