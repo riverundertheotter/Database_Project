@@ -1,4 +1,5 @@
--- populate section
+-- populate section starts HERE
+-- Department population
 INSERT INTO
     DEPARTMENT (dep_id, dep_name)
 VALUES
@@ -31,6 +32,11 @@ VALUES
         '5432 W. Nemo Street',
         NULL
     );
+
+INSERT INTO
+    ADDRESS (address_id, zip, city, state, line1, line2)
+VALUES
+    (1, 75001, 'Dallas', 'TX', '123 Elm Street', NULL);
 
 INSERT INTO
     ADDRESS (address_id, city, state, zip, line1, line2)
@@ -202,6 +208,28 @@ INSERT INTO
 VALUES
     (24098);
 
+-- For query 1
+INSERT INTO
+    COMPANY_AFFILIATE (
+        personal_id,
+        fname,
+        lname,
+        age,
+        gender,
+        address_id
+    )
+VALUES
+    (101, 'Hellen', 'Cole', 30, 'F', 1),
+    (201, 'Jack', 'Bonn', 40, 'M', 1),
+    (202, 'Elizabeth', 'Free', 35, 'F', 1);
+
+-- the interviewers
+INSERT INTO
+    EMPLOYEE (personal_id, rank_title, dep_id)
+VALUES
+    (201, 'Senior Engineer', 2),
+    (202, 'HR Specialist', 3);
+
 -- Customers
 INSERT INTO
     COMPANY_AFFILIATE (
@@ -297,7 +325,7 @@ VALUES
 INSERT INTO
     JOB_POS (job_id, job_desc, post_date, d_id)
 VALUES
-    (11111, 'Sales Associate 2024', '2024-08-14', 1);
+    (1001, 'Sales Associate 2024', '2024-08-14', 1);
 
 INSERT INTO
     JOB_POS (job_id, job_desc, post_date, d_id)
@@ -314,6 +342,12 @@ VALUES
         2
     );
 
+-- for query 1
+INSERT INTO
+    JOB_POS (job_id, job_desc, post_date, d_id)
+VALUES
+    (11111, 'Software Engineer', '2024-11-01', 1);
+
 -- values to test query 7
 INSERT INTO
     JOB_POS (job_id, job_desc, post_date, d_id)
@@ -327,6 +361,12 @@ INSERT INTO
     APPLICATION (app_id, personal_id, job_id)
 VALUES
     (24098, 24098, 1001);
+
+-- for query 1, Hellen Cole will apply
+INSERT INTO
+    APPLICATION (app_id, personal_id, job_id)
+VALUES
+    (301, 101, 11111);
 
 -- POTENTIAL EMPLOYEE Linda Garcia
 INSERT INTO
@@ -365,6 +405,12 @@ INSERT INTO
     INTERVIEW (time, personal_id, grade, app_id, round_num)
 VALUES
     ('2024-01-01 10:00:00', 25001, 60, 10001, 1);
+
+-- for query 1
+INSERT INTO
+    INTERVIEW (time, personal_id, grade, app_id, round_num)
+VALUES
+    ('2024-11-15 10:30:00', 101, 85, 301, 1);
 
 INSERT INTO
     INTERVIEW (time, personal_id, grade, app_id, round_num)
@@ -441,6 +487,13 @@ INSERT INTO
     INTERVIEWERS (personal_id, round_num, app_id, interviewer_id)
 VALUES
     (24098, 1, 24098, 17330);
+
+-- for query 1
+INSERT INTO
+    INTERVIEWERS (personal_id, round_num, app_id, interviewer_id)
+VALUES
+    (101, 1, 301, 201),
+    (101, 1, 301, 202);
 
 INSERT INTO
     INTERVIEWERS (personal_id, round_num, app_id, interviewer_id)
@@ -806,134 +859,3 @@ INSERT INTO
     EMAIL (personal_id, email_addr)
 VALUES
     (24098, 'lindag@email.com');
-
--- View3
-CREATE VIEW
-    View3 AS
-SELECT
-    p.product_type,
-    COUNT(s.sale_id) AS items_sold
-FROM
-    SALE s
-    JOIN PRODUCT p ON s.prod_id = p.prod_id
-GROUP BY
-    p.product_type;
-
--- View4
-CREATE VIEW
-    View4 AS
-SELECT
-    rp.prod_id,
-    SUM(pr.price) AS total_part_cost
-FROM
-    REQUIRED_PARTS rp
-    JOIN PART pr on rp.part_id = pr.part_id
-GROUP BY
-    rp.prod_id;
-
--- Query 1
-SELECT
-    i.interviewer_id,
-    CONCAT (c.fname, ' ', c.lname) AS interviewer_name
-FROM
-    INTERVIEWERS i
-    JOIN EMPLOYEE em ON i.interviewer_id = em.personal_id
-    JOIN COMPANY_AFFILIATE c ON em.personal_id = c.personal_id
-    JOIN APPLICATION a ON i.app_id = a.app_id
-    JOIN COMPANY_AFFILIATE interviewee ON a.personal_id = interviewee.personal_id
-WHERE
-    interviewee.fname = "Hellen"
-    AND interviewee.lname = "Cole"
-    AND a.job_id = 11111;
-
--- Query 2
-SELECT
-    j.job_id
-FROM
-    JOB_POS j
-    JOIN DEPARTMENT d ON j.job_id
-WHERE
-    d.dep_name = 'Marketing'
-    AND j.post_date BETWEEN '2011-01-01' AND '2011-01-31';
-
--- Query 3
-SELECT
-    e.personal_id,
-    CONCAT (ca.fname, ' ', ca.lname)
-FROM
-    EMPLOYEE e
-    JOIN COMPANY_AFFILIATE ca ON e.personal_id = ca.personal_id
-WHERE
-    e.personal_id NOT IN (
-        SELECT
-            sup_id
-        FROM
-            MANAGES
-    );
-
--- Query 4
-SELECT
-    s.site_id,
-    s.site_location
-FROM
-    SITE S
-    JOIN DEPARTMENT d ON d.dep_id = (
-        SELECT
-            dep_id
-        FROM
-            DEPARTMENT
-        WHERE
-            dep_name = 'Marketing'
-    )
-    LEFT JOIN SALE sa ON sa.site_id = s.site_id
-    AND sa.sale_time BETWEEN '2011-03-01' AND '2011-03-31'
-WHERE
-    sa.sale_id IS NULL;
-
--- Query 5
-SELECT
-    j.job_id,
-    j.job_desc
-FROM
-    JOB_POS j
-    LEFT JOIN APPLICATION a ON j.job_id = a.job_id
-WHERE
-    a.app_id IS NULL
-    AND j.post_date < DATE_SUB (NOW (), INTERVAL 1 MONTH);
-
--- Query 6
-SELECT
-    e.personal_id,
-    CONCAT (ca.fname, " ", ca.lname) AS salesperson_name
-FROM
-    EMPLOYEE e
-    JOIN COMPANY_AFFILIATE ca ON e.personal_id = ca.personal_id
-WHERE
-    NOT EXISTS (
-        SELECT DISTINCT
-            p.product_type
-        FROM
-            PRODUCT p
-        WHERE
-            p.list_price > 200
-            AND NOT EXISTS (
-                SELECT
-                    1
-                FROM
-                    SALE s
-                WHERE
-                    s.salesperson_id = e.personal_id
-                    AND s.prod_id = p.prod_id
-            )
-    );
-
--- Query 7
-SELECT
-    d.dep_id,
-    d.dep_name
-FROM
-    DEPARTMENT d
-    LEFT JOIN JOB_POS j ON d.dep_id = j.d_id
-    AND j.post_date BETWEEN '2011-01-01' AND '2011-02-01'
-WHERE
-    j.job_id IS NULL;
